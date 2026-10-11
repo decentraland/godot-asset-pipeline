@@ -1,7 +1,7 @@
 name: Publish 'latest' image
 
 on:
-  # Disabled until the quay repo and the definitions service exist: manual runs
+  # Disabled until the definitions service exists in stg and prd: manual runs
   # only. Restore the original trigger below to enable it.
   workflow_dispatch:
   # release:
@@ -21,6 +21,6 @@ jobs:
     # job avoids building the image twice.
     uses: decentraland/platform-actions/.github/workflows/apps-docker-release.yml@main
     with:
-      service-name: asset-optimizer
+      service-name: godot-asset-optimizer
       deployment-environment: stg prd
     secrets: inherit

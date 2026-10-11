@@ -1,10 +1,7 @@
 name: CI/CD on PR
 
 on:
-  # Disabled until the quay repo and the definitions service exist: manual runs
-  # only. Restore the original trigger below to enable it.
-  workflow_dispatch:
-  # pull_request:
+  pull_request:
 
 jobs:
   pr:
@@ -12,5 +9,5 @@ jobs:
     # when QUAY_* secrets are available, so fork PRs build without pushing.
     uses: decentraland/platform-actions/.github/workflows/apps-pr.yml@main
     with:
-      service-name: asset-optimizer
+      service-name: godot-asset-optimizer
     secrets: inherit

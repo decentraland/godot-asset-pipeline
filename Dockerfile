@@ -1,4 +1,4 @@
-# asset-optimizer: Node worker + the godot-explorer headless asset server.
+# godot-asset-optimizer: Node worker + the godot-explorer headless asset server.
 #
 # Build context is the repo root. CI builds it with decentraland/platform-actions
 # (apps-pr / apps-docker-next / apps-docker-release), which pass COMMIT_HASH and
