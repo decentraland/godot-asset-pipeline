@@ -1,0 +1,96 @@
+# LOCAL DEVELOPMENT ONLY. In AWS the worker runs on ECS with the queues,
+# bucket and IAM task role created by definitions; nothing here is used there.
+#
+# Emulators (no accounts or tokens needed, both Apache-2.0):
+#   - ElasticMQ  -> SQS  (http://localhost:9324, stats UI http://localhost:9325)
+#   - S3Mock     -> S3   (http://localhost:9090, path-style)
+# LocalStack is not used: since its 2026.x releases the localstack/localstack
+# image requires an auth token.
+#
+# Usage:
+#   docker compose up --build
+#   # enqueue a job (the worker image ships the queue CLI):
+#   docker compose exec worker node dist/cli/queue.js <entityId>
+#   docker compose exec worker node dist/cli/queue.js --priority <entityId>
+#   # or from the host:
+#   SQS_ENDPOINT=http://localhost:9324 AWS_REGION=us-east-1 \
+#   AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test \
+#   TASK_QUEUE=http://elasticmq:9324/000000000000/asset-optimizer-tasks yarn queue <entityId>
+#   # inspect the output:
+#   aws --endpoint-url http://localhost:9090 s3 ls s3://asset-optimizer-local/v6/
+#
+# The worker image is linux/amd64 only (the godot binary is x86_64); on Apple
+# Silicon it runs under emulation and bakes are much slower.
+
+x-aws-local: &aws-local
+  AWS_REGION: us-east-1
+  AWS_DEFAULT_REGION: us-east-1
+  # Dummy credentials for the emulators (the default credential chain needs
+  # something). Never put real keys here.
+  AWS_ACCESS_KEY_ID: test
+  AWS_SECRET_ACCESS_KEY: test
+  SQS_ENDPOINT: http://elasticmq:9324
+  S3_ENDPOINT: http://s3:9090
+  BUCKET: asset-optimizer-local
+
+services:
+  elasticmq:
+    image: softwaremill/elasticmq-native:1.7.1
+    ports:
+      - "9324:9324"
+      - "9325:9325"
+    volumes:
+      - ./scripts/local/elasticmq.conf:/opt/elasticmq.conf:ro
+
+  s3:
+    image: adobe/s3mock:5.2.2
+    ports:
+      - "9090:9090"
+
+  # One-shot: creates the bucket, the DLQ and the main/priority queues with a
+  # redrive policy, then exits.
+  init:
+    image: amazon/aws-cli:2.37.10
+    depends_on:
+      - elasticmq
+      - s3
+    entrypoint: ["/bin/bash", "/scripts/init-aws.sh"]
+    environment:
+      <<: *aws-local
+      MAIN_QUEUE_NAME: asset-optimizer-tasks
+      PRIORITY_QUEUE_NAME: asset-optimizer-priority-tasks
+      DLQ_NAME: asset-optimizer-tasks-dlq
+      MAX_RECEIVE_COUNT: "6"
+      VISIBILITY_TIMEOUT: "900"
+    volumes:
+      - ./scripts/local:/scripts:ro
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+      args:
+        # Passed through only when set in your shell; otherwise the
+        # Dockerfile's pinned default is used.
+        - GODOT_IMAGE
+    image: asset-optimizer:local
+    platform: linux/amd64
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    ports:
+      # Host 5050: macOS AirPlay Receiver holds :5000
+      - "5050:5000"
+    environment:
+      <<: *aws-local
+      HTTP_SERVER_HOST: 0.0.0.0
+      HTTP_SERVER_PORT: "5000"
+      TASK_QUEUE: http://elasticmq:9324/000000000000/asset-optimizer-tasks
+      PRIORITY_TASK_QUEUE: http://elasticmq:9324/000000000000/asset-optimizer-priority-tasks
+      S3_ACCESS_KEY_ID: test
+      S3_SECRET_ACCESS_KEY: test
+      S3_PREFIX: v6
+      CATALYST_URL: https://peer.decentraland.org
+      JOB_VISIBILITY_TIMEOUT_SECONDS: "900"

@@ -1,0 +1,19 @@
+node_modules/
+dist/
+dist-test/
+coverage/
+npm-debug.log
+yarn-error.log
+**/.DS_Store
+
+# local configuration (.env.default is committed and documents every variable)
+.env
+.env.*
+!.env.default
+
+# local run output
+storage/
+temp/
+output/
+original-content/
+godot4_editor/

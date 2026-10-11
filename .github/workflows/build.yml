@@ -1,0 +1,17 @@
+name: build
+
+on:
+  # Disabled until the quay repo and the definitions service exist: manual runs
+  # only. Restore the original trigger below to enable it.
+  workflow_dispatch:
+  # push:
+  # pull_request:
+
+jobs:
+  build:
+    # yarn install --frozen-lockfile, yarn lint:check, yarn build, yarn test --coverage
+    # (+ coveralls, since the repo is public). Unit tests mock godot, so no
+    # godot binary or display is needed on the runner.
+    uses: decentraland/platform-actions/.github/workflows/apps-build.yml@main
+    with:
+      node-version: 24.x

@@ -1,0 +1,26 @@
+name: Publish 'latest' image
+
+on:
+  # Disabled until the quay repo and the definitions service exist: manual runs
+  # only. Restore the original trigger below to enable it.
+  workflow_dispatch:
+  # release:
+  #   types:
+  #     - "created"
+
+jobs:
+  cd:
+    # Caps the reusable workflow's token; its deploy job needs deployments: write
+    # (works even if the repo default GITHUB_TOKEN permissions are read-only).
+    permissions:
+      contents: read
+      deployments: write
+    # One build per release: pushes :<release-tag> and :latest and deploys the
+    # :<release-tag> image to stg and prd. deploy-service accepts several
+    # space-separated environments (one GitHub Deployment per env), so a single
+    # job avoids building the image twice.
+    uses: decentraland/platform-actions/.github/workflows/apps-docker-release.yml@main
+    with:
+      service-name: asset-optimizer
+      deployment-environment: stg prd
+    secrets: inherit

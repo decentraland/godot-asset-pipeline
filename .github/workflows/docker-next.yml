@@ -1,0 +1,27 @@
+name: CI/CD on main branch
+
+on:
+  # Disabled until the quay repo and the definitions service exist: manual runs
+  # only. Restore the original trigger below to enable it.
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - "main"
+
+jobs:
+  cd:
+    # Caps the reusable workflow's token; its deploy job needs deployments: write
+    # (works even if the repo default GITHUB_TOKEN permissions are read-only).
+    permissions:
+      contents: read
+      deployments: write
+    # Pushes quay.io/decentraland/asset-optimizer:<sha> and :next, then deploys
+    # the :<sha> image to dev (definitions/src/services/asset-optimizer.ts).
+    # The godot-explorer base is pinned by the Dockerfile's GODOT_IMAGE default;
+    # override it here with `build-args: GODOT_IMAGE=...` only to test another
+    # immutable tag.
+    uses: decentraland/platform-actions/.github/workflows/apps-docker-next.yml@main
+    with:
+      service-name: asset-optimizer
+      deployment-environment: dev
+    secrets: inherit
