@@ -21,7 +21,7 @@
     "@types/adm-zip": "^0.5.7",
     "@types/node": "^24.0.0",
     "@types/node-fetch": "^2.5.12",
-    "@well-known-components/test-helpers": "^1.5.0",
+    "@well-known-components/test-helpers": "^1.5.8",
     "typescript": "^5.9.2"
   },
   "prettier": {
