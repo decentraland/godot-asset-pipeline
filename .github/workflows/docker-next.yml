@@ -1,12 +1,9 @@
 name: CI/CD on main branch
 
 on:
-  # Disabled until the quay repo and the definitions service exist: manual runs
-  # only. Restore the original trigger below to enable it.
-  workflow_dispatch:
-  # push:
-  #   branches:
-  #     - "main"
+  push:
+    branches:
+      - "main"
 
 jobs:
   cd:
@@ -15,13 +12,13 @@ jobs:
     permissions:
       contents: read
       deployments: write
-    # Pushes quay.io/decentraland/asset-optimizer:<sha> and :next, then deploys
-    # the :<sha> image to dev (definitions/src/services/asset-optimizer.ts).
+    # Pushes quay.io/decentraland/godot-asset-optimizer:<sha> and :next. Deploying
+    # to dev is off until the definitions service (src/services/godot-asset-optimizer.ts)
+    # and its storage stack exist; then add `deployment-environment: dev` below.
     # The godot-explorer base is pinned by the Dockerfile's GODOT_IMAGE default;
     # override it here with `build-args: GODOT_IMAGE=...` only to test another
     # immutable tag.
     uses: decentraland/platform-actions/.github/workflows/apps-docker-next.yml@main
     with:
-      service-name: asset-optimizer
-      deployment-environment: dev
+      service-name: godot-asset-optimizer
     secrets: inherit

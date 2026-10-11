@@ -1,4 +1,4 @@
-# asset-optimizer
+# godot-asset-pipeline
 
 Bakes Decentraland content into Godot-optimized assets for the Godot (mobile) explorer.
 
@@ -252,24 +252,24 @@ The tests mock the asset server, SQS, ECS task protection and S3, so they need n
 
 ## Deployment
 
-The image is `quay.io/decentraland/asset-optimizer`, built from the repo-root `Dockerfile`:
+The image is `quay.io/decentraland/godot-asset-optimizer`, built from the repo-root `Dockerfile`:
 - The build stage uses Node 24.
 - The runtime stage is `GODOT_IMAGE`, pinned to an immutable godot-explorer commit-sha tag, with Node 24, tini and the Xvfb probe tools added.
 - The baked output depends on the engine version. Bump `GODOT_IMAGE` on purpose, and bump `S3_PREFIX` with it whenever the output format changes.
 
 Workflows (`.github/workflows/`, all using [decentraland/platform-actions](https://github.com/decentraland/platform-actions)):
 
-The build and deploy workflows are manual-only (`workflow_dispatch`) until the quay repo and the ECS service exist. Each file keeps its real trigger commented out; restore it to enable the workflow.
+The image is built and pushed to quay, but nothing deploys yet. `docker-next.yml` will deploy to dev once `deployment-environment: dev` is added back, after the ECS service exists. `docker-release.yml` stays manual-only (`workflow_dispatch`) until stg and prd exist; its real trigger is commented out.
 
 | Workflow | Trigger | Does |
 |---|---|---|
-| `build.yml` | push, PR (disabled) | `apps-build.yml`: lint, build, test, coverage |
-| `pr.yml` | PR (disabled) | `apps-pr.yml`: builds the image, tagged with the PR head sha |
-| `docker-next.yml` | push to `main` (disabled) | `apps-docker-next.yml`: pushes `:<sha>` and `:next`, deploys to **dev** |
+| `build.yml` | push, PR | `apps-build.yml`: lint, build, test, coverage |
+| `pr.yml` | PR | `apps-pr.yml`: builds the image, tagged with the PR head sha |
+| `docker-next.yml` | push to `main` | `apps-docker-next.yml`: pushes `:<sha>` and `:next` (the deploy to **dev** is not enabled yet) |
 | `docker-release.yml` | GitHub release created (disabled) | `apps-docker-release.yml`: pushes `:<release-tag>` and `:latest`, deploys to **stg** and **prd** |
 | `validate-pr-title.yml` | PR | Conventional-commit PR titles |
 
-The ECS service is defined in Decentraland's internal infrastructure definitions (`src/services/asset-optimizer.ts`). That file owns:
+The ECS service is defined in Decentraland's internal infrastructure definitions (`src/services/godot-asset-optimizer.ts`). That file owns:
 - the queues and the DLQ (with the redrive `maxReceiveCount`), and the SNS subscription with its filter policy
 - the S3 bucket permissions on the task role
 - the environment variables
