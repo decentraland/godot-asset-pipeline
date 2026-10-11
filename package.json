@@ -17,7 +17,7 @@
     "test": "jest --forceExit --detectOpenHandles --coverage --verbose"
   },
   "devDependencies": {
-    "@dcl/eslint-config": "^2.2.1",
+    "@dcl/eslint-config": "^2.4.3",
     "@types/adm-zip": "^0.5.7",
     "@types/node": "^24.0.0",
     "@types/node-fetch": "^2.5.12",
