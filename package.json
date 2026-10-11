@@ -32,9 +32,9 @@
     "tabWidth": 2
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.726.1",
-    "@aws-sdk/client-sqs": "^3.975.0",
-    "@aws-sdk/lib-storage": "^3.726.1",
+    "@aws-sdk/client-s3": "^3.1149.0",
+    "@aws-sdk/client-sqs": "^3.1149.0",
+    "@aws-sdk/lib-storage": "^3.1149.0",
     "@dcl/schemas": "^27.2.0",
     "@smithy/types": "^4.12.0",
     "@well-known-components/env-config-provider": "^1.1.1",
@@ -43,11 +43,14 @@
     "@well-known-components/logger": "^3.1.2",
     "@well-known-components/metrics": "^2.0.1-20220909150423.commit-8f7e5bc",
     "@well-known-components/pushable-channel": "^1.0.3",
-    "adm-zip": "^0.5.16",
+    "adm-zip": "^0.6.1",
     "node-fetch": "^2.6.9",
     "p-queue": "6.6.2"
   },
   "engines": {
     "node": ">=24"
+  },
+  "resolutions": {
+    "**/@typescript-eslint/typescript-estree/minimatch": "^9.0.7"
   }
 }
